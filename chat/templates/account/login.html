@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Connection{% endblock %}
+
+{% block main %}
+    <div class="container d-flex align-items-center justify-content-center vh-100">
+        <div class="col-md-6 col-lg-4 mx-auto">
+            <main class="form-signin w-100 m-auto">
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <h1 class="h3 mb-3 fw-normal">Se connecter</h1>
+
+                    {% if form.errors %}
+                        <div class="span3 alert alert-danger">
+                            <h4>Erreur !</h4>
+                            <p>Veuillez saisir un nom d'utilisateur et un mot de passe corrects. Les champs sont sensibles à la casse.</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="floatingInput" placeholder="Nom d'utilisateur" required>
+                        <label for="floatingInput">Nom d'utilisateur</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="floatingPassword" placeholder="Mot de passe" required>
+                        <label for="floatingPassword">Mot de passe</label>
+                    </div>
+                    <button class="btn btn-primary w-100 py-2" type="submit">Se connecter</button>
+                </form>
+            </main>
+        </div>
+    </div>
+{% endblock %}

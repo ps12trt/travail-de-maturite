@@ -17,11 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from .views import index
-from chat.views import index as chat_index
+from chat.views import index, login, signup, chat
 
 urlpatterns = [
-    path('', index, name="index"),
-    path('chat/', chat_index),
     path('admin/', admin.site.urls),
+    path('', index, name="index"),
+    path('login/', login, name="login"),
+    path('signup/', signup, name="signup"),
+    path('chat/', chat, name="chat")
 ]

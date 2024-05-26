@@ -1,8 +1,10 @@
 # Travail de maturité
-## Messagerie en python axée sur la vie privée
+## Messagerie en Python axée sur la vie privée
 
 ### Requirements
 - Django
+- MySQL / MariaDB
+- 
 
 ### Installation
 ```

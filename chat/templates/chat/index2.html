@@ -65,13 +65,14 @@
                         </div>
                         <img src="https://img.favpng.com/11/3/6/computer-icons-scalable-vector-graphics-user-profile-font-png-favpng-9nEm3HNNqMqJK3QJ0f38j1wX2.jpg" alt="avatar 1" style="width: 45px; height: 100%;">
                     </div>
-
-                    <form action="post">
+                    <div class="input-group">
                         <div class="mb-3">
-                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="Entrez votre message"></textarea>
+                            <input type="text" class="form-control" id="chatMessageInput" rows="3" placeholder="Entrez votre message">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary btn-rounded float-end" id="chatMessageSend" type="button">Envoyer</button>
+                            </div>
                         </div>
-                        <input type="button" id="chat-message-submit" class="btn btn-primary btn-rounded float-end" value="Envoyer">
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

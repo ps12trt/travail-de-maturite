@@ -1,17 +1,32 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.contrib.auth.models import User
-
-from chat.models import Room
-
-
-def index(request, user):
-    user = User.objects.get(username=user)
-    return render(request, 'base.html', {'rooms': user.user_rooms.all()})
+from chat.models import Room, Message
 
 
+def index(request):
+    return render(request, 'base.html')
+
+
+def get_most_recent_message(room):
+    return Message.objects.filter(room=room).order_by('-timestamp').first()
+
+
+@login_required
 def room(request, room_name):
-    chat_room, created = Room.objects.get_or_create(name=room_name)
-    return render(request, 'chat/index.html', {'room': chat_room, })
+    room = Room.objects.get(name=room_name)
+    rooms = Room.objects.filter(user=request.user)
+    last_message = get_most_recent_message(room)
+    users_except_request_user = room.user.exclude(id=request.user.id)
+
+    context = {
+        'user': request.user,
+        'users_except_request_user': users_except_request_user,
+        'room_name': room_name,
+        'rooms': rooms,
+        'last_message': last_message
+    }
+    return render(request, 'rooms/index.html', context)
 
 
 def login(request):

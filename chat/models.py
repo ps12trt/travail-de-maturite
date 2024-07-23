@@ -23,7 +23,8 @@ class Room(models.Model):
         self.save()
 
     def __str__(self):
-        return f'{self.name} {self.user} ({self.online_count()})'
+        users = ', '.join([user.get_username() for user in self.user.all()])
+        return f'{self.name} ({users}): ({self.online_count()})'
 
 
 class Message(models.Model):
@@ -33,4 +34,13 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user.username}: {self.content} [{self.timestamp}]'
+        return f'[{self.timestamp}], {self.room.name} ({self.user.username}): {self.content}'
+
+
+class PublicKey(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    key = models.CharField(max_length=2048)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username}: {self.key} [{self.timestamp}]'

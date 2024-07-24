@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.contrib.auth.models import User
 from chat.models import Room, Message
 
 
@@ -10,6 +9,10 @@ def index(request):
 
 def get_most_recent_message(room):
     return Message.objects.filter(room=room).order_by('-timestamp').first()
+
+
+def chat(request):
+    return render(request, 'rooms/index.html')
 
 
 @login_required

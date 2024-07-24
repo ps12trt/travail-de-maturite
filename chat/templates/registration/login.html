@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Connection{% endblock %}
+
+{% block main %}
+        {% if user.is_authenticated %}
+            <div class="d-flex align-items-center justify-content-center">
+                <div class="col-md-6 col-lg-4 mx-auto">
+                    <h1 class="h3 mb-3 fw-normal">Se connecter</h1>
+                    <div class="form-floating mb-3">
+                        <div class="span3 alert alert-danger">
+                            <h4>Erreur !</h4>
+                            <p>Vous êtes déja connecté.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="container d-flex align-items-center justify-content-center vh-100">
+                <div class="col-md-6 col-lg-4 mx-auto">
+                    <main class="form-signin w-100 m-auto">
+                        <form method="post" action="{% url 'login' %}">
+
+                            {% csrf_token %}
+                            <h1 class="h3 mb-3 fw-normal">Se connecter</h1>
+
+                            {% if form.errors %}
+                                <div class="span3 alert alert-danger">
+                                    <h4>Erreur !</h4>
+                                    <p>Veuillez saisir un nom d'utilisateur et un mot de passe corrects. Les champs sont sensibles à la casse.</p>
+                                </div>
+                            {% endif %}
+
+                            <div class="form-floating mb-3">
+                                <input type="text" name="username" class="form-control" id="{{ form.username.id_for_label }}" placeholder="Nom d'utilisateur" value="{{ form.username.value|default_if_none:"" }}" required>
+                                <label for="{{ form.username.id_for_label }}">{{ form.username.label_tag }}</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="password" name="password" class="form-control" id="{{ form.password.id_for_label }}" placeholder="Mot de passe" value="{{ form.password.value|default_if_none:"" }}" required>
+                                <label for="{{ form.password.id_for_label }}">{{ form.password.label_tag }}</label>
+                            </div>
+                            <button class="btn btn-primary w-100 py-2" type="submit">Se connecter</button>
+                        </form>
+                    </main>
+                </div>
+            </div>
+        {% endif %}
+    {% endblock %}

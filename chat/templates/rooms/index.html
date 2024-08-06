@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}{{ room.name }}{% endblock %}
+{% block title %}{% for user in users_except_request_user %}{{ user.username }}{% endfor %}{% endblock %}
 
 {% block main %}
     {% if user.is_authenticated %}
@@ -16,7 +16,6 @@
                                 <strong class="mb-1">
                                     {% for user in users_except_request_user %}
                                         {{ user.username }}
-                                        {% if not forloop.last %}, {% endif %}
                                     {% endfor %}
                                 </strong>
                             </div>
@@ -32,16 +31,20 @@
                                                 {% endif %}
                                             {% endfor %}
                                         </strong>
-                                        <small>{{ last_message.timestamp}}</small>
+                                        <small>
+                                                {{ last_message.timestamp }}
+                                        </small>
                                     </div>
-                                    <div class="col-10 mb-1 small">{{ last_message.content|default:"Aucun message" }}</div>
+                                    <div class="col-10 mb-1 small">{{ last_message.content|default:"Aucun message"|truncatechars:16 }}</div>
                                 </a>
                             {% endif %}
                         {% endfor %}
+                <a class="btn btn-light" href="{% url 'add-contact' %}"><i class="fa fa-plus-square" aria-hidden="true"></i></a>
+
                 </div>
             </div>
             <div class="col-md-8 col-lg-9 col-xl-9">
-                <textarea class="form-control" id="chat-log" readonly></textarea>
+                <textarea class="form-control" id="chat-log" rows="20" readonly></textarea>
                 <div class="input-group">
                     <div>
                         <input type="text" class="form-control" id="chat-message-input" placeholder="Entrez votre message">

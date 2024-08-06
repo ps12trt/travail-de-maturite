@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Messagerie{% endblock %}
+
+{% block main %}
+    {% if user.is_authenticated %}
+        <div class="container d-flex align-items-center justify-content-center vh-100">
+            <div class="col-md-6 col-lg-4 mx-auto">
+                <div class="card" style="width: 18rem;">
+                  <i class="fa fa-users fa-3x py-3 text-center" aria-hidden="true"></i>
+                  <div class="card-body">
+                    <a href="{% url 'add-contact' %}" class="card-title stretched-link h5 text-center text-decoration-none">Ajouter un contact</a>
+                  </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                  <i class="fa fa-sign-out fa-3x py-3 text-center" aria-hidden="true"></i>
+                  <div class="card-body">
+                      <form action="{% url 'logout' %}" method="post">
+                      {% csrf_token %}
+                        <button type="submit" class="card-title stretched-link h5 text-center text-decoration-none border-0 bg-body">Se déconnecter</button>
+                      </form>
+                  </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                  <i class="fa fa-comment fa-3x py-3 text-center" aria-hidden="true"></i>
+                  <div class="card-body">
+                    <a href="{% url 'chat' %}" class="card-title stretched-link h5 text-center text-decoration-none">Chat</a>
+                  </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                  <i class="fa fa-user fa-3x py-3 text-center" aria-hidden="true"></i>
+                  <div class="card-body">
+                    <a href="#" class="card-title stretched-link h5 text-center text-decoration-none">Mon profil</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="container d-flex align-items-center justify-content-center vh-100">
+            <div class="col-md-6 col-lg-4 mx-auto">
+                <div class="card" style="width: 18rem;">
+                  <i class="fa fa-sign-in fa-3x py-3 text-center" aria-hidden="true"></i>
+                  <div class="card-body">
+                    <a href="{% url 'login' %}" class="card-title stretched-link h5 text-center text-decoration-none">Se connecter</a>
+                  </div>
+                </div>
+                <div class="card" style="width: 18rem;">
+                  <i class="fa fa-plus fa-3x py-3 text-center" aria-hidden="true"></i>
+                  <div class="card-body">
+                    <a href="{% url 'signup' %}" class="card-title stretched-link h5 text-center text-decoration-none">Créer un compte</a>
+                  </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

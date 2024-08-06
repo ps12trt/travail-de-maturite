@@ -1,14 +1,11 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import OuterRef
 from django.shortcuts import render
 from chat.models import Room, Message
 
 
 def index(request):
-    return render(request, 'base.html')
-
-
-def get_most_recent_message(room):
-    return Message.objects.filter(room=room).order_by('-timestamp').first()
+    return render(request, 'index.html')
 
 
 def chat(request):
@@ -19,7 +16,7 @@ def chat(request):
 def room(request, room_name):
     room = Room.objects.get(name=room_name)
     rooms = Room.objects.filter(user=request.user)
-    last_message = get_most_recent_message(room)
+    last_message = Message.objects.filter(room=OuterRef('pk')).order_by('-timestamp')
     users_except_request_user = room.user.exclude(id=request.user.id)
 
     context = {
@@ -32,9 +29,8 @@ def room(request, room_name):
     return render(request, 'rooms/index.html', context)
 
 
-def login(request):
-    return render(request, 'account/login.html')
+def add_contact(request):
+    context = {
 
-
-def signup(request):
-    return render(request, 'account/signup.html')
+    }
+    return render(request, 'rooms/contact.html', context)

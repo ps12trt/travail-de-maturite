@@ -29,6 +29,12 @@ class ChatConsumer(WebsocketConsumer):
         self.room.online.add(self.user)
         self.room.save()
 
+        last_messages = reversed(Message.objects.filter(room=self.room).order_by('-timestamp')[:50])
+        for message in last_messages:
+            self.send(text_data=json.dumps({
+                'message': message.content
+            }))
+
     def disconnect(self, close_code):
 
         if self.user.is_authenticated:

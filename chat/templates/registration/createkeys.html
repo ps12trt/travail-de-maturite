@@ -28,7 +28,9 @@
                             <pre>{{ privatekey }}</pre>
                             <a  href="{% url 'priv_download_pem' %}" class="btn btn-primary">Télécharger la clée privée</a>
                         {% endif %}
+                        {% if uid %}
                         <p><strong>UID:</strong> {{ uid }}</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

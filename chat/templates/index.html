@@ -14,7 +14,7 @@
                 <div class="card" style="width: 18rem;">
                   <i class="fa fa-sign-out fa-3x py-3 text-center" aria-hidden="true"></i>
                   <div class="card-body">
-                      <form action="{% url 'logout' %}" method="post">
+                      <form action="{% url 'logout-c' %}" method="post">
                       {% csrf_token %}
                         <button type="submit" class="card-title stretched-link h5 text-center text-decoration-none border-0 bg-body">Se déconnecter</button>
                       </form>

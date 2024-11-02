@@ -49,7 +49,10 @@ class ChatConsumer(WebsocketConsumer):
         last_messages = reversed(Message.objects.filter(room=self.room).order_by('-timestamp')[:50])
         for message in last_messages:
             try:
-                m = message_decrypt(int(message.content), self.rsa_d_cookie_value, self.rsa_n_cookie_value)
+                if self.user == message.user:
+                    m = message_decrypt(int(message.content_sender), self.rsa_d_cookie_value, self.rsa_n_cookie_value)
+                else:
+                    m = message_decrypt(int(message.content_receiver), self.rsa_d_cookie_value, self.rsa_n_cookie_value)
                 decrypted_message = int_to_str(m)
                 self.send(text_data=json.dumps({'message': decrypted_message}))
             except Exception as e:
@@ -66,31 +69,45 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data=None, bytes_data=None):
         try:
             json_text = json.loads(text_data)
-            message = json_text['message']
-            print(f"Message reçu dans la room {self.room_name}: {json_text}")
+            message_sender = json_text['message_sender']
+            message_receiver = json_text['message_receiver']
+
+            #print(f"Message sender reçu dans la room {self.room_name}: {message_sender}")
+            #print(f"Message receiver reçu dans la room {self.room_name}: {message_sender}")
 
             async_to_sync(self.channel_layer.group_send)(
                 self.group_name,
                 {
                     'type': 'chat_message',
-                    'message': message
+                    'user': self.user,
+                    'message_sender': message_sender,
+                    'message_receiver': message_receiver
                 }
             )
 
             room = Room.objects.get(name=self.room_name)
-            Message.objects.create(user=self.user, room=room, content=message)
+            Message.objects.create(user=self.user, room=room, content_sender=message_sender, content_receiver=message_receiver)
 
         except Exception as e:
             print(f"Erreur lors de la réception du message : {e}")
 
     def chat_message(self, event):
         try:
-            c_message = event['message']
-            message_int = message_decrypt(c_message, self.rsa_d_cookie_value, self.rsa_n_cookie_value)
-            message = int_to_str(message_int)
+            if self.user == event['user']:
+                message = event['message_sender']
+            else:
+                message = event['message_receiver']
 
-            self.send(text_data=json.dumps({'message': message}))
-            print(f"Message envoyé dans la room {self.room_name}: {message}")
+            if int(message) >= self.rsa_n_cookie_value:
+                raise ValueError("Le message est trop grand pour être déchiffré")
 
+            m = message_decrypt(int(message), self.rsa_d_cookie_value, self.rsa_n_cookie_value)
+            decrypted_message = int_to_str(m)
+
+            self.send(text_data=json.dumps({'message': decrypted_message}))
+            #print(f"Message envoyé dans la room {self.room_name}: {decrypted_message}")
+
+        except ValueError as e:
+            print(f"Erreur de taille du message : {e}")
         except Exception as e:
             print(f"Erreur lors de l'envoi du message : {e}")

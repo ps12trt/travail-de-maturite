@@ -47,14 +47,18 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-const eCookie = getCookie('rsa_pub_key_e');
-const nCookie = getCookie('rsa_pub_key_n');
+const esCookie = getCookie('rsa_pub_key_es');
+const erCookie = getCookie('rsa_pub_key_er');
+const nsCookie = getCookie('rsa_pub_key_ns');
+const nrCookie = getCookie('rsa_pub_key_nr');
 
-if (!eCookie || !nCookie) {
+if (!esCookie || !erCookie || !nsCookie || !nrCookie) {
     console.error("RSA public key cookies are missing or invalid.");
 } else {
-    const e_rsa = BigInt(eCookie);
-    const n_rsa = BigInt(nCookie);
+    const es_rsa = BigInt(esCookie);
+    const er_rsa = BigInt(erCookie);
+    const ns_rsa = BigInt(nsCookie);
+    const nr_rsa = BigInt(nrCookie);
 
 // Fin
 
@@ -72,6 +76,7 @@ if (!eCookie || !nCookie) {
         // Converti le message JSON en objet JavaScript, puis examine et agit sur son contenu.
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
+            console.log(data)
             document.querySelector('#chat-log').value += (data.message + '\n');
         };
 
@@ -96,11 +101,13 @@ if (!eCookie || !nCookie) {
             const mInt = strToInt(message);
 
             // Chiffrer le message entier
-            const encryptedMessage = messageEncrypt(mInt, e_rsa, n_rsa);
+            const encryptedMessageSender = messageEncrypt(mInt, es_rsa, ns_rsa);
+            const encryptedMessageReceiver = messageEncrypt(mInt, er_rsa, nr_rsa);
 
             // Envoie le message au format JSON
             chatSocket.send(JSON.stringify({
-                'message': encryptedMessage.toString()
+                'message_sender': encryptedMessageSender.toString(),
+                'message_receiver': encryptedMessageReceiver.toString()
             }));
 
             // vide l'élement de texte

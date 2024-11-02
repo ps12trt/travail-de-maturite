@@ -1,22 +1,22 @@
 import string
 import uuid
 
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.db.models import OuterRef
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from chat.models import Room, Message, PublicKey, UID
+from chat.models import Room, PublicKey, UID
 from chat.rsa import *
 
 
 def index(request):
     if request.user.is_authenticated:
         try:
-            publickey = PublicKey.objects.get(user=request.user)
+            PublicKey.objects.get(user=request.user)
         except PublicKey.DoesNotExist:
             return redirect(create_keys)
 
-        if 'rsa-priv_key_n' not in request.COOKIES:
+        if 'rsa_priv_key_n' or 'rsa_priv_key_d' not in request.COOKIES:
             return redirect(privkey_login)
 
     return render(request, 'index.html')
@@ -24,18 +24,25 @@ def index(request):
 
 @login_required
 def room(request, room_name=""):
+    if 'rsa_priv_key_n' not in request.COOKIES:
+        return redirect(privkey_login)
+
     if not room_name == "":
         room = get_object_or_404(Room, name=room_name)
         users_except_request_user = room.user.exclude(id=request.user.id)
-        last_message = Message.objects.filter(room=OuterRef('pk')).order_by('-timestamp')
 
-        rsa_pub_key_pem = PublicKey.objects.get(user=room.user.exclude(id=request.user.id).first())
-        n, e = pem_to_publickey(rsa_pub_key_pem.key)
+        if request.user not in room.user.all():
+            return HttpResponseForbidden("<h1>Vous n'êtes pas autorisé à accéder à cette salle.</h1>")
+
+        rsa_r_pubkey_pem = PublicKey.objects.get(user=room.user.exclude(id=request.user.id).first())
+        rsa_s_pubkey_pem = PublicKey.objects.get(user=request.user)
+        n_r, e_r = pem_to_publickey(rsa_r_pubkey_pem.key)
+        n_s, e_s = pem_to_publickey(rsa_s_pubkey_pem.key)
     else:
         room = None
         users_except_request_user = None
-        last_message = None
-        n, e = None, None
+        n_r, n_s, e_r, e_s = None, None, None, None
+
     rooms = Room.objects.filter(user=request.user)
 
     context = {
@@ -43,12 +50,13 @@ def room(request, room_name=""):
         'rooms': rooms,
         'user': request.user,
         'users_except_request_user': users_except_request_user,
-        'last_message': last_message
     }
     response = render(request, 'rooms/index.html', context)
-    if n and e:
-        response.set_cookie('rsa_pub_key_n', n)
-        response.set_cookie('rsa_pub_key_e', e)
+    if n_r and n_s and e_r and e_s:
+        response.set_cookie('rsa_pub_key_nr', n_r)
+        response.set_cookie('rsa_pub_key_ns', n_s)
+        response.set_cookie('rsa_pub_key_er', e_r)
+        response.set_cookie('rsa_pub_key_es', e_s)
     return response
 
 
@@ -64,39 +72,44 @@ def create_numbers():
 
 @login_required
 def create_keys(request):
-    random_name = uuid.uuid4()
-
     try:
-        publickey = PublicKey.objects.get(user=request.user).key
-        uid = UID.objects.get(user=request.user).uid
-        privatekey = None
-
+        PublicKey.objects.get(user=request.user).key
     except PublicKey.DoesNotExist:
+        random_name = uuid.uuid4()
         n, e, d, p, q = create_numbers()
         privatekey = privatekey_to_pem(n, e, d, p, q)
         publickey = publickey_to_pem(n, e)
 
         PublicKey.objects.create(user=request.user, key=publickey)
-        new_user_uid = UID.objects.create(user=request.user, uid=random_name)
+        UID.objects.create(user=request.user, uid=random_name)
         request.session['privatekey'] = privatekey
+
+        context = {
+            'publickey': publickey,
+            'privatekey': privatekey,
+            'uid': random_name
+        }
+        return render(request, 'registration/createkeys.html', context)
+    return render(request, 'registration/createkeys.html')
+
+
+def regenerate_keys(request):
+    PublicKey.objects.get(user=request.user).delete()
+    n, e, d, p, q = create_numbers()
+    privatekey = privatekey_to_pem(n, e, d, p, q)
+    publickey = publickey_to_pem(n, e)
+    PublicKey.objects.create(user=request.user, key=publickey)
+    request.session['privatekey'] = privatekey
 
     context = {
         'publickey': publickey,
         'privatekey': privatekey,
-        'uid': random_name
     }
     return render(request, 'registration/createkeys.html', context)
 
 
-def regenerate_keys(request):
-    pass
-
-
 def privkey_login(request):
     if request.method == 'POST':
-        if request.FILES:
-            print("Fichiers transmis :", request.FILES)
-
         if 'pem_file' in request.FILES:
             pem_file = request.FILES['pem_file']
             pem_content = pem_file.read().decode('utf-8')
@@ -105,6 +118,7 @@ def privkey_login(request):
 
             response = render(request, "registration/privkey_login.html")
             if n and d:
+                response = redirect('chat')
                 response.set_cookie('rsa_priv_key_n', n)
                 response.set_cookie('rsa_priv_key_d', d)
             return response
@@ -181,3 +195,11 @@ def download_privkey_pem(request):
         return response
     else:
         return HttpResponse("Aucune clée trouvée", status=404)
+
+
+def logout_cookies(request):
+    logout(request)
+    response = redirect('login')
+    for cookie in request.COOKIES:
+        response.delete_cookie(cookie)
+    return response

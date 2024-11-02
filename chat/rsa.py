@@ -153,8 +153,10 @@ def str_to_int(m):
 
 
 def int_to_str(m_int):
-    # Taille de byte est variante (à comprendre !)
-    nb_bytes = 255
+    # Calculer dynamiquement le nombre de bytes nécessaires
+    nb_bytes = (m_int.bit_length() + 7) // 8  # Nombre minimum de bytes requis pour stocker l'entier
+    if nb_bytes == 0:  # Gérer le cas où m_int est 0
+        nb_bytes = 1
     m_bytes = m_int.to_bytes(nb_bytes, byteorder="big")
     m = m_bytes.decode("utf-8")
     return m

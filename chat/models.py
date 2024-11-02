@@ -30,11 +30,12 @@ class Room(models.Model):
 class Message(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     room = models.ForeignKey(to=Room, on_delete=models.CASCADE)
-    content = models.CharField(max_length=1024)
+    content_sender = models.CharField(max_length=2048)
+    content_receiver = models.CharField(max_length=2048)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'[{self.timestamp}], {self.room.name} ({self.user.username}): {self.content}'
+        return f'[{self.timestamp}], {self.room.name} ({self.user.username}): sender:{self.content_sender}, receiver:{self.content_receiver},'
 
 
 class UID(models.Model):

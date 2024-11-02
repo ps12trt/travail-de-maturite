@@ -1,28 +1,36 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}{% for user in users_except_request_user %}{{ user.username }}{% endfor %}{% endblock %}
+{% block title %}
+    {% if room_name == '' %}
+        Chat - {{ request.user }}
+    {% else %}
+        {% for user in users_except_request_user %}{{ user.username }}{% endfor %}
+    {% endif %}
+{% endblock %}
 
 {% block main %}
-    {% if user.is_authenticated %}
-    <div class="container-fluid">
+    <div class="container-fluid py-3">
         <div class="row">
+        <!-- Sidebar -->
             <div class="col-md-4 col-lg-3 col-xl-3 d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary" >
                 <a class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
                     <span class="fs-5 fw-semibold">Contact</span>
                 </a>
                 <div class="list-group list-group-flush border-bottom scrollarea">
-                    <a href="" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
-                            <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1">
-                                    {% for user in users_except_request_user %}
-                                        {{ user.username }}
-                                    {% endfor %}
-                                </strong>
-                            </div>
-                        </a>
+                    {% if not room_name == "" %}
+                        <a href="" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
+                                <div class="d-flex w-100 align-items-center justify-content-between">
+                                    <strong class="mb-1">
+                                        {% for user in users_except_request_user %}
+                                            {{ user.username }}
+                                        {% endfor %}
+                                    </strong>
+                                </div>
+                            </a>
+                        {% endif %}
                         {% for room in rooms %}
                             {% if room.name != room_name %}
-                                <a href="../{{ room.name }}" class="list-group-item list-group-item-action  py-3 lh-sm" aria-current="true">
+                                <a href="{% url 'chat-room' room.name %}" class="list-group-item list-group-item-action  py-3 lh-sm" aria-current="true">
                                     <div class="d-flex w-100 align-items-center justify-content-between">
                                         <strong class="mb-1">
                                             {% for user in room.user.all %}
@@ -31,38 +39,28 @@
                                                 {% endif %}
                                             {% endfor %}
                                         </strong>
-                                        <small>
-                                                {{ last_message.timestamp }}
-                                        </small>
                                     </div>
-                                    <div class="col-10 mb-1 small">{{ last_message.content|default:"Aucun message"|truncatechars:16 }}</div>
                                 </a>
                             {% endif %}
                         {% endfor %}
                 <a class="btn btn-light" href="{% url 'add-contact' %}"><i class="fa fa-plus-square" aria-hidden="true"></i></a>
-
                 </div>
             </div>
             <div class="col-md-8 col-lg-9 col-xl-9">
-                <textarea class="form-control" id="chat-log" rows="20" readonly></textarea>
-                <div class="input-group">
-                    <div>
-                        <input type="text" class="form-control" id="chat-message-input" placeholder="Entrez votre message">
-                        <button class="btn btn-primary btn-rounded float-end" id="chat-message-submit" type="button">Envoyer</button>
+                <div class="card mb-4">
+                    <div class="card-body p-0">
+                        <textarea class="form-control border-0" id="chat-log" rows="20" readonly style="resize: none;"></textarea>
                     </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="chat-message-input" placeholder="Entrez votre message">
+                    <button class="btn btn-primary" id="chat-message-submit" type="button">
+                        <i class="fa fa-paper-plane" aria-hidden="true"></i> Envoyer
+                    </button>
                 </div>
             </div>
         </div>
     </div>
     {{ room_name|json_script:"room-name" }}
     <script src="{% static 'js/chat.js' %}"></script>
-    {% else %}
-        <div class="row d-flex align-items-center justify-content-center">
-            <div class="col-md-4 col-lg-3 col-xl-3">
-                <div class="alert alert-danger" role="alert">
-                    Vous devez être connecté pour accéder au chat
-                </div>
-            </div>
-        </div>
-    {% endif %}
 {% endblock %}

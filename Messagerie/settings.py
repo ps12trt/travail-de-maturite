@@ -126,7 +126,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
-LOGIN_REDIRECT_URL = '/chat'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -141,11 +141,11 @@ CHANNEL_LAYERS = {
     }
 }
 
-#CHANNEL_LAYERS = {
+# CHANNEL_LAYERS = {
 #    "default": {
 #        "BACKEND": "channels_redis.core.RedisChannelLayer",
 #        "CONFIG": {
 #            "hosts": [("127.0.0.1", 6379)],
 #        },
 #    },
-#}
+# }

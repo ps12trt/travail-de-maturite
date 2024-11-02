@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon profil - {{ request.user }}{% endblock %}
+
+{% block main %}
+    <div class="container-fluid">
+        <div class="row d-flex align-items-center justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Mon profil</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Nom d'utilisateur:</strong> {{ request.user }}</p>
+                        <p><strong>UID:</strong> {{ uid }}</p>
+                        <p><strong>Clé publique:</strong></p>
+                        <pre>{{ publickey }}</pre>
+                        <a href="{% url 'pub_download_pem' %}" class="btn btn-primary">Télécharger la clée publique</a>
+                        <a href="{% url 'regen_key' %}" class="btn btn-danger">Regénérer un paire de clée</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -37,10 +37,18 @@ class Message(models.Model):
         return f'[{self.timestamp}], {self.room.name} ({self.user.username}): {self.content}'
 
 
+class UID(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    uid = models.CharField(max_length=36)
+
+    def __str__(self):
+        return f'User: {self.user.username}, [{self.uid}]'
+
+
 class PublicKey(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     key = models.CharField(max_length=2048)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user.username}: {self.key} [{self.timestamp}]'
+        return f'User: {self.user.username}, [{self.timestamp}], {self.key}'

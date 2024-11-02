@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{% for user in users_except_request_user %}{{ user.username }}{% endfor %}{% endblock %}
+
+{% block main %}
+    {% if publickey and not privatekey %}
+    <div class="row d-flex align-items-center justify-content-center">
+        <div class="col-md-4 col-lg-3 col-xl-3">
+            <div class="alert alert-danger" role="alert">
+                Vous ne pouvez pas créer une nouvelle clée
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="container-fluid">
+        <div class="row d-flex align-items-center justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Clés RSA</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Clé publique:</strong></p>
+                        <pre>{{ publickey }}</pre>
+                        <a href="{% url 'pub_download_pem' %}" class="btn btn-primary">Télécharger la clée publique</a>
+                        {% if privatekey %}
+                            <p><strong>Clé privée:</strong></p>
+                            <pre>{{ privatekey }}</pre>
+                            <a  href="{% url 'priv_download_pem' %}" class="btn btn-primary">Télécharger la clée privée</a>
+                        {% endif %}
+                        <p><strong>UID:</strong> {{ uid }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

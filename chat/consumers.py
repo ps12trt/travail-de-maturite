@@ -1,8 +1,8 @@
 import json
-
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from .models import Room, Message
+from .rsa import *
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -13,14 +13,31 @@ class ChatConsumer(WebsocketConsumer):
         self.room = None
         self.group_name = None
         self.room_name = None
+        self.rsa_d_cookie_value = None
+        self.rsa_n_cookie_value = None
 
     def connect(self):
-
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.group_name = f'chat_{self.room_name}'
 
-        async_to_sync(self.channel_layer.group_add)(self.group_name, self.channel_name)
+        try:
+            self.rsa_d_cookie_value = int(self.scope['cookies'].get('rsa_priv_key_d'))
+            self.rsa_n_cookie_value = int(self.scope['cookies'].get('rsa_priv_key_n'))
 
+            if not self.rsa_d_cookie_value or not self.rsa_n_cookie_value:
+                print("Clés RSA manquantes")
+                self.close()
+                return
+        except ValueError:
+            print("Erreur: Clés RSA non valides")
+            self.close()
+            return
+        except Exception as e:
+            print(f"Erreur: {e}")
+            self.close()
+            return
+
+        async_to_sync(self.channel_layer.group_add)(self.group_name, self.channel_name)
         self.accept()
 
         self.user = self.scope['user']
@@ -31,9 +48,12 @@ class ChatConsumer(WebsocketConsumer):
 
         last_messages = reversed(Message.objects.filter(room=self.room).order_by('-timestamp')[:50])
         for message in last_messages:
-            self.send(text_data=json.dumps({
-                'message': message.content
-            }))
+            try:
+                m = message_decrypt(int(message.content), self.rsa_d_cookie_value, self.rsa_n_cookie_value)
+                decrypted_message = int_to_str(m)
+                self.send(text_data=json.dumps({'message': decrypted_message}))
+            except Exception as e:
+                print(f"Erreur de déchiffrement : {e}")
 
     def disconnect(self, close_code):
 
@@ -44,26 +64,33 @@ class ChatConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_discard)(self.group_name, self.channel_name)
 
     def receive(self, text_data=None, bytes_data=None):
+        try:
+            json_text = json.loads(text_data)
+            message = json_text['message']
+            print(f"Message reçu dans la room {self.room_name}: {json_text}")
 
-        json_text = json.loads(text_data)
-        message = json_text['message']
+            async_to_sync(self.channel_layer.group_send)(
+                self.group_name,
+                {
+                    'type': 'chat_message',
+                    'message': message
+                }
+            )
 
-        # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
-            self.group_name,
-            {
-                'type': 'chat_message',
-                'message': message
-            }
-        )
+            room = Room.objects.get(name=self.room_name)
+            Message.objects.create(user=self.user, room=room, content=message)
 
-        room = Room.objects.get(name=self.room_name)
-        Message.objects.create(user=self.user, room=room, content=json_text['message'])
+        except Exception as e:
+            print(f"Erreur lors de la réception du message : {e}")
 
     def chat_message(self, event):
-        message = event['message']
+        try:
+            c_message = event['message']
+            message_int = message_decrypt(c_message, self.rsa_d_cookie_value, self.rsa_n_cookie_value)
+            message = int_to_str(message_int)
 
-        # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'message': message
-        }))
+            self.send(text_data=json.dumps({'message': message}))
+            print(f"Message envoyé dans la room {self.room_name}: {message}")
+
+        except Exception as e:
+            print(f"Erreur lors de l'envoi du message : {e}")

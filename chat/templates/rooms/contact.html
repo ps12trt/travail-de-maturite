@@ -3,42 +3,32 @@
 {% block title %}Ajouter un contact{% endblock %}
 
 {% block main %}
-    {% if user.is_authenticated %}
-        <div class="container d-flex align-items-center justify-content-center vh-100">
-            <div class="col-md-6 col-lg-4 mx-auto">
-                <main class="form-signin w-100 m-auto">
-                    <form method="post" action="{% url 'add-contact' %}">
+    <div class="container d-flex align-items-center justify-content-center vh-100">
+        <div class="col-md-6 col-lg-4 mx-auto">
+            <main class="form-signin w-100 m-auto">
+                <form method="post" action="{% url 'add-contact' %}">
 
-                        {% csrf_token %}
-                        <h1 class="h3 mb-3 fw-normal text-center">Ajouter un contact</h1>
+                    {% csrf_token %}
+                    <h1 class="h3 mb-3 fw-normal text-center">Ajouter un contact</h1>
 
-                        {% if form.errors %}
-                            <div class="span3 alert alert-danger">
-                                <h4>Erreur !</h4>
-                                <p>Le code que vous venez de saisir est invalide</p>
-                            </div>
-                        {% endif %}
-
-                        <div class="pt-5 pb-5 text-center">
-                            <i class="fa fa-users fa-5x " aria-hidden="true"></i>
+                    {% if form.errors %}
+                        <div class="span3 alert alert-danger">
+                            <h4>Erreur !</h4>
+                            <p>Le code que vous venez de saisir est invalide</p>
                         </div>
+                    {% endif %}
 
-                        <div class="form-floating mb-3">
-                            <input type="text" name="id" class="form-control" id="add-contact-id" placeholder="Code de l'utilisateur" value="" required>
-                            <label for="add-contact-id">Code de l'utilisateur</label>
-                        </div>
-                        <button class="btn btn-primary w-100 py-2" type="submit">Ajouter</button>
-                    </form>
-                </main>
-            </div>
+                    <div class="pt-5 pb-5 text-center">
+                        <i class="fa fa-users fa-5x " aria-hidden="true"></i>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" name="uid" class="form-control" id="uid" placeholder="Code de l'utilisateur" value="" required>
+                        <label for="uid">UID</label>
+                    </div>
+                    <button class="btn btn-primary w-100 py-2" type="submit">Ajouter</button>
+                </form>
+            </main>
         </div>
-    {% else %}
-        <div class="row d-flex align-items-center justify-content-center">
-            <div class="col-md-4 col-lg-3 col-xl-3">
-                <div class="alert alert-danger" role="alert">
-                    Vous devez être connecté pour ajouter un contact
-                </div>
-            </div>
-        </div>
-    {% endif %}
+    </div>
 {% endblock %}

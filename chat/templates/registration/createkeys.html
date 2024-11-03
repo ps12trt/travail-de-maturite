@@ -12,24 +12,35 @@
         </div>
     </div>
     {% else %}
-    <div class="container-fluid">
+    <div class="container">
         <div class="row d-flex align-items-center justify-content-center">
-            <div class="col-md-6">
+            <div class="col-8 mb-4">
+                <div class="alert alert-primary d-flex align-items-center" role="alert">
+                    <p><i class="fa fa-paper-plane" aria-hidden="true"></i> Voici vos paires de clés RSA et votre identifiant UID. Elles sont indispensables pour pouvoir utiliser cette messagerie.</p>
+                </div>
+                <div class="alert alert-warning" role="alert">
+                    <p><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Sauvegardez votre clé privée en un lieu sûr, car elle n'est pas enregistrée sur le serveur. Si vous la perdez, vous ne pourrez plus accéder aux messages qui vous sont destinés.</p>
+                    <p><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <strong>Ne partagez jamais votre clé privée</strong></p>
+                </div>
+            </div>
+            <div class="col-8 mb-4">
                 <div class="card">
                     <div class="card-header">
                         <h5>Clés RSA</h5>
                     </div>
                     <div class="card-body">
-                        <p><strong>Clé publique:</strong></p>
-                        <pre>{{ publickey }}</pre>
-                        <a href="{% url 'pub_download_pem' %}" class="btn btn-primary">Télécharger la clée publique</a>
-                        {% if privatekey %}
-                            <p><strong>Clé privée:</strong></p>
-                            <pre>{{ privatekey }}</pre>
-                            <a  href="{% url 'priv_download_pem' %}" class="btn btn-primary">Télécharger la clée privée</a>
-                        {% endif %}
                         {% if uid %}
                         <p><strong>UID:</strong> {{ uid }}</p>
+                        {% endif %}
+                        {% if privatekey %}
+                            <p class="pt-4"><strong>Clé privée:</strong></p>
+                            <pre>{{ privatekey }}</pre>
+                            <a  href="{% url 'priv_download_pem' %}" class="btn btn-primary mt-3">Télécharger la clée privée</a>
+                        {% endif %}
+                        {% if publickey %}
+                            <p class="pt-4"><strong>Clé publique:</strong></p>
+                            <pre>{{ publickey }}</pre>
+                            <a href="{% url 'pub_download_pem' %}" class="btn btn-primary mt-3">Télécharger la clée publique</a>
                         {% endif %}
                     </div>
                 </div>

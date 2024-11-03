@@ -16,7 +16,7 @@ def index(request):
         except PublicKey.DoesNotExist:
             return redirect(create_keys)
 
-        if 'rsa_priv_key_n' or 'rsa_priv_key_d' not in request.COOKIES:
+        if 'rsa_priv_key_n' and 'rsa_priv_key_d' not in request.COOKIES:
             return redirect(privkey_login)
 
     return render(request, 'index.html')
@@ -24,7 +24,7 @@ def index(request):
 
 @login_required
 def room(request, room_name=""):
-    if 'rsa_priv_key_n' not in request.COOKIES:
+    if 'rsa_priv_key_n' and 'rsa_priv_key_d' not in request.COOKIES:
         return redirect(privkey_login)
 
     if not room_name == "":

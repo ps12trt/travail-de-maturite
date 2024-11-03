@@ -17,10 +17,30 @@
                         <p><strong>Clé publique:</strong></p>
                         <pre>{{ publickey }}</pre>
                         <a href="{% url 'pub_download_pem' %}" class="btn btn-primary">Télécharger la clée publique</a>
-                        <a href="{% url 'regen_key' %}" class="btn btn-danger">Regénérer un paire de clée</a>
+                        <a href="{% url 'regen_key' %}" class="btn btn-danger" id="regen">Regénérer un paire de clée</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        // Généré à l'aide de ChatGPT 4o
+        document.addEventListener('DOMContentLoaded', function() {
+        const regenLink = document.querySelector('#regen');
+
+        if (regenLink) {
+            regenLink.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                const userConfirmation = confirm("Voulez-vous vraiment régénérer une nouvelle paire de clés ?");
+
+                if (userConfirmation) {
+                    window.location.href = regenLink.href;
+                } else {
+                    console.log("L'utilisateur a annulé la régénération des clés.");
+                }
+            });
+        }
+        });
+    </script>
 {% endblock %}

@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from .models import Room, Message
@@ -54,7 +56,12 @@ class ChatConsumer(WebsocketConsumer):
                 else:
                     m = message_decrypt(int(message.content_receiver), self.rsa_d_cookie_value, self.rsa_n_cookie_value)
                 decrypted_message = int_to_str(m)
-                self.send(text_data=json.dumps({'message': decrypted_message}))
+                self.send(text_data=json.dumps({
+                    'user': str(message.user),
+                    'message': decrypted_message,
+                    'time': str(message.timestamp.strftime('%d.%m.%Y, %H:%M:%S'))
+                }
+                ))
             except Exception as e:
                 print(f"Erreur de déchiffrement : {e}")
 
@@ -72,8 +79,8 @@ class ChatConsumer(WebsocketConsumer):
             message_sender = json_text['message_sender']
             message_receiver = json_text['message_receiver']
 
-            #print(f"Message sender reçu dans la room {self.room_name}: {message_sender}")
-            #print(f"Message receiver reçu dans la room {self.room_name}: {message_sender}")
+            # print(f"Message sender reçu dans la room {self.room_name}: {message_sender}")
+            # print(f"Message receiver reçu dans la room {self.room_name}: {message_sender}")
 
             async_to_sync(self.channel_layer.group_send)(
                 self.group_name,
@@ -81,7 +88,8 @@ class ChatConsumer(WebsocketConsumer):
                     'type': 'chat_message',
                     'user': self.user,
                     'message_sender': message_sender,
-                    'message_receiver': message_receiver
+                    'message_receiver': message_receiver,
+                    'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 }
             )
 
@@ -104,8 +112,12 @@ class ChatConsumer(WebsocketConsumer):
             m = message_decrypt(int(message), self.rsa_d_cookie_value, self.rsa_n_cookie_value)
             decrypted_message = int_to_str(m)
 
-            self.send(text_data=json.dumps({'message': decrypted_message}))
-            #print(f"Message envoyé dans la room {self.room_name}: {decrypted_message}")
+            self.send(text_data=json.dumps({
+                'user': str(event['user']),
+                'message': decrypted_message,
+                'time': str(event['time']),
+            }))
+            # print(f"Message envoyé dans la room {self.room_name}: {decrypted_message}")
 
         except ValueError as e:
             print(f"Erreur de taille du message : {e}")

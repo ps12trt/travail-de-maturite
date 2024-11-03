@@ -77,7 +77,7 @@ if (!esCookie || !erCookie || !nsCookie || !nrCookie) {
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             console.log(data)
-            document.querySelector('#chat-log').value += (data.message + '\n');
+            document.querySelector('#chat-log').value += ("[" + data.time + "] " + data.user + " : " + data.message + '\n');
         };
 
         // Affiche un message si la connexion WebSocket si elle est fermée inopinément.
